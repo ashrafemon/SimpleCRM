@@ -1,0 +1,5 @@
+@import "vfonts/Lato.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
