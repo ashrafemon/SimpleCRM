@@ -22,13 +22,14 @@ import { ref, computed } from 'vue';
 import { useMutation } from '@tanstack/vue-query';
 import { useMessage } from 'naive-ui';
 import { updateApplication } from '@/States/Actions/Applications';
+import type { PropType } from 'vue'
 
 const message = useMessage()
 
 const { data, isLoading, found, refetch } = defineProps({
     data: {
         required: true,
-        type: Array as PropType<{ id: string, name: string, status: string }[]>,
+        type: Array as PropType<{ id: string, name: string, status: string, lead: { name: string } }[]>,
         default: []
     },
     isLoading: {
@@ -54,7 +55,7 @@ const cardSettings = ref<any>({
 })
 
 const kanbanData = computed(() => {
-    return data.map((item) => ({
+    return data.map((item: { id: string, name: string, status: string, lead: { name: string } }) => ({
         id: item.id,
         name: item.name,
         status: item.status,
