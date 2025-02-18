@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Repositories;
 
+use App\Events\LeadMaintainerConvert;
 use App\Http\Contracts\RepositoryContract;
 use App\Models\LeadMaintainer;
 use Exception;
@@ -42,6 +43,7 @@ class LeadMaintainerRepository implements RepositoryContract
     public function get($id)
     {
         try {
+            $condition = ['id' => $id];
             $relations = [];
             $fields    = ['id', 'lead_id', 'user_id', 'status'];
 
@@ -53,7 +55,7 @@ class LeadMaintainerRepository implements RepositoryContract
                 $relations = gettype(request()->input('relations')) === 'array' ? request()->input('relations') : explode(',', request()->input('relations'));
             }
 
-            if (! $doc = LeadMaintainer::query()->with($relations)->select($fields)->first()) {
+            if (! $doc = LeadMaintainer::query()->with($relations)->select($fields)->where($condition)->first()) {
                 return messageResponse();
             }
 
@@ -66,6 +68,11 @@ class LeadMaintainerRepository implements RepositoryContract
     public function store($request)
     {
         try {
+            $condition = ['lead_id' => $request->input('lead_id')];
+            if (LeadMaintainer::query()->where($condition)->exists()) {
+                return messageResponse('Sorry, Lead is already maintain by another counselor', 400);
+            }
+
             LeadMaintainer::query()->create($request->validated());
             return messageResponse('Lead maintainer added successfully', 201, 'success');
         } catch (Exception $e) {
@@ -80,7 +87,15 @@ class LeadMaintainerRepository implements RepositoryContract
                 return messageResponse();
             }
 
+            if ($request->input('status') === 'CONVERTED' && $doc->status === 'CONVERTED') {
+                return messageResponse('Lead is already converted', 400);
+            }
+
             $doc->update($request->validated());
+            if ($doc->status === 'CONVERTED') {
+                LeadMaintainerConvert::dispatch($doc, $request->input('app_name'));
+            }
+
             return messageResponse('Lead maintainer updated successfully', 200, 'success');
         } catch (Exception $e) {
             return serverError($e);

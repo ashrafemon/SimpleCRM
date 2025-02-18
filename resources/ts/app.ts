@@ -2,6 +2,8 @@ import NaiveProvider from "@/Providers/NaiveProvider.vue";
 import { createInertiaApp } from "@inertiajs/vue3";
 import naive from "naive-ui";
 import { createApp, h } from "vue";
+import { VueQueryPlugin } from "@tanstack/vue-query";
+import AuthProvider from "@/Providers/AuthProvider.vue";
 
 createInertiaApp({
     resolve: (name) => {
@@ -13,11 +15,16 @@ createInertiaApp({
             title: (title: string) => `${title} - SimpleCRM`,
             render: () =>
                 h(NaiveProvider, null, {
-                    default: () => h(App, props),
+                    default: () =>
+                        h(AuthProvider, null, {
+                            default: () => h(App, props),
+                        }),
+                        // h(App, props)
                 }),
         })
             .use(plugin)
             .use(naive)
+            .use(VueQueryPlugin)
             .mount(el);
     },
     progress: {

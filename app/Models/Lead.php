@@ -13,8 +13,18 @@ class Lead extends Model
         'type', 'name', 'email', 'phone', 'address', 'status',
     ];
 
-    public function counselors()
+    public function maintainers()
     {
         return $this->hasMany(LeadMaintainer::class, 'lead_id');
+    }
+
+    public function maintainer()
+    {
+        return $this->hasOne(LeadMaintainer::class, 'lead_id');
+    }
+
+    public function counselor()
+    {
+        return $this->belongsToMany(User::class, 'lead_maintainers', 'lead_id', 'user_id');
     }
 }

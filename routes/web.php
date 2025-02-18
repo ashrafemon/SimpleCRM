@@ -7,4 +7,5 @@ Route::get('login', fn() => inertia('Auth/Login'))->name('auth.login');
 
 Route::get('dashboard', fn() => inertia('Panel/Dashboard'))->name('dashboard');
 Route::get('leads', fn() => inertia('Panel/Leads'))->name('leads');
+//Route::get('assignments', fn() => inertia('Panel/Assignments'))->name('assignments');
 Route::get('applications', fn() => inertia('Panel/Applications'))->name('applications');

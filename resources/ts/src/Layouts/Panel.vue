@@ -1,48 +1,67 @@
 <template>
     <n-layout class="h-screen">
         <n-layout-header bordered class="p-1 h-[60px]">
-            <n-space justify="space-between" align="center">
+            <n-space align="center" justify="space-between">
                 <Link href="/dashboard">
-                <n-space align="center">
-                    <n-image :src="Images.logo" width="50" preview-disabled />
-                    <p class="text-xl font-semibold">SimpleCRM</p>
-                </n-space>
+                    <n-space align="center">
+                        <n-image :src="Images.logo" preview-disabled width="50"/>
+                        <p class="text-xl font-semibold">SimpleCRM</p>
+                    </n-space>
                 </Link>
 
-                <n-dropdown :options="userOptions" :on-select="userOptionHandler">
-                    <n-button size="large" quaternary>
+                <n-dropdown :on-select="userOptionHandler" :options="userOptions">
+                    <n-button quaternary size="large">
                         <template #icon>
-                            <n-image :src="Images.logo" />
+                            <n-image :src="Images.logo"/>
                         </template>
-                        Admin User
+                        {{ currentUser?.name ?? 'Anonymous' }}
                     </n-button>
                 </n-dropdown>
             </n-space>
         </n-layout-header>
-        <n-layout has-sider position="absolute" class="!top-[60px]">
-            <n-layout-sider bordered show-trigger collapse-mode="width" :collapsed-width="64" :width="200"
-                :native-scrollbar="false">
-                <n-menu :collapsed-width="64" :collapsed-icon-size="22" :options="navOptions"
-                    :on-update:value="pageRouter" />
+        <n-layout class="!top-[60px]" has-sider position="absolute">
+            <n-layout-sider :collapsed-width="64" :native-scrollbar="false" :width="200" bordered collapse-mode="width"
+                            show-trigger>
+                <n-menu :collapsed-icon-size="22" :collapsed-width="64" :on-update:value="pageRouter"
+                        :options="navOptions"/>
             </n-layout-sider>
             <n-layout-content class="p-2">
-                <slot />
+                <slot/>
             </n-layout-content>
         </n-layout>
     </n-layout>
+    <VueQueryDevtools/>
 </template>
 
-<script setup lang="ts">
-import { Images } from '@/Constants/theme';
-import { Link, router } from '@inertiajs/vue3';
-import { Dashboard, TaskApproved, UserAvatar } from '@vicons/carbon';
-import { IosLogOut } from '@vicons/ionicons4';
-import { Stack2 } from '@vicons/tabler';
-import { NIcon } from 'naive-ui';
-import { Component, h } from 'vue';
+<script lang="ts" setup>
+import {Images} from '@/Constants/theme';
+import {Link, router, usePage} from '@inertiajs/vue3';
+import {Dashboard, TaskApproved, UserAvatar} from '@vicons/carbon';
+import {IosLogOut} from '@vicons/ionicons4';
+import {Stack2} from '@vicons/tabler';
+import {NIcon, useMessage} from 'naive-ui';
+import {Component, h, inject} from 'vue';
+import {VueQueryDevtools} from '@tanstack/vue-query-devtools'
+import {useMutation} from '@tanstack/vue-query';
+import {logout} from '@/States/Actions/Auth';
+import Cookies from 'js-cookie';
+
+const currentUser = inject('currentUser');
+const message = useMessage()
+
+const logoutMutation = useMutation({
+    mutationFn: () => logout(),
+    onSuccess: (data) => {
+        Cookies.remove('token')
+        router.visit('/login')
+    },
+    onError: (error) => {
+        message.error(error.message)
+    }
+})
 
 const renderIcon = (icon: Component) => {
-    return () => h(NIcon, null, { default: () => h(icon) })
+    return () => h(NIcon, null, {default: () => h(icon)})
 }
 
 const pageRouter = (key: string) => {
@@ -51,7 +70,7 @@ const pageRouter = (key: string) => {
 
 const userOptionHandler = (key: string) => {
     if (key === 'logout') {
-        router.visit('/login')
+        logoutMutation.mutate()
     }
 }
 

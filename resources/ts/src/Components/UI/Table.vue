@@ -23,7 +23,7 @@
                     <tr>
                         <td :colspan="props.headers?.length">
                             <div class="py-10 px-1">
-                                <n-empty description="Something went wrong" />
+                                <n-empty :description="props.error" />
                             </div>
                         </td>
                     </tr>
@@ -60,6 +60,6 @@ const props = defineProps<{
     found?: boolean;
     isLoading?: boolean;
     isError?: boolean;
-    error?: any
+    error?: string
 }>();
 </script>

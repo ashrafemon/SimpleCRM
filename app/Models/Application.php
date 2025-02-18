@@ -19,6 +19,6 @@ class Application extends Model
 
     public function counselor()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

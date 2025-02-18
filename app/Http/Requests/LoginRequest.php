@@ -5,7 +5,7 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class LeadRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,12 +23,8 @@ class LeadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'    => 'sometimes|required|in:COMPANY,PERSON',
-            'name'    => 'sometimes|required',
-            'email'   => 'sometimes|required|email',
-            'phone'   => 'sometimes',
-            'address' => 'sometimes',
-            'status'  => 'sometimes|required|in:active,inactive',
+            'email'    => 'required|email',
+            'password' => 'required|min:6',
         ];
     }
 

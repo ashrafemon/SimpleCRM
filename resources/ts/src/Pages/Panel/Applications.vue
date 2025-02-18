@@ -7,60 +7,34 @@
             <p class="text-xl font-semibold mb-5">Applications</p>
         </n-space>
 
-        <Table :headers="headers" :found="true">
+        <Table :error="error?.message" :found="isSuccess && data?.data?.data.length > 0" :headers="headers"
+            :isError="isError" :isLoading="isFetching">
             <template #rows>
-                <tr v-for="(v, i) in 10" :key="i">
-                    <td>25/09/2004</td>
+                <tr v-for="(item, i) in data?.data?.data" :key="i">
+                    <td>{{ item?.name ?? 'N/A' }}</td>
                     <td>
                         <n-flex align="center">
-                            <n-avatar :src="Images.logo" size="large" class="h-auto" />
                             <n-flex vertical :size="1">
-                                <p class="text-base font-semibold">Ashraf Emon</p>
-                                <p class="text-xs">ashraf.emon143@gmail.com</p>
+                                <p class="text-base font-semibold">{{ item?.lead?.name ?? 'N/A' }}</p>
+                                <p class="text-xs">{{ item?.lead?.email ?? 'N/A' }}</p>
                             </n-flex>
                         </n-flex>
                     </td>
                     <td>
                         <n-flex align="center">
-                            <n-avatar :src="Images.logo" size="large" />
                             <n-flex vertical :size="1">
-                                <p class="text-base font-semibold">Ashraf Emon</p>
-                                <p class="text-xs">ashraf.emon143@gmail.com</p>
+                                <p class="text-base font-semibold">{{ item?.counselor?.name ?? 'N/A' }}</p>
+                                <p class="text-xs">{{ item?.counselor?.email ?? 'N/A' }}</p>
                             </n-flex>
                         </n-flex>
                     </td>
-                    <td>
-                        <n-tag type="success">In Progress</n-tag>
-                    </td>
+                    <td>{{ item?.status ?? 'N/A' }}</td>
                     <td>
                         <n-space align="center">
                             <n-tooltip>
                                 <template #trigger>
-                                    <n-button strong secondary circle type="primary">
-                                        <template #icon>
-                                            <n-icon>
-                                                <View />
-                                            </n-icon>
-                                        </template>
-                                    </n-button>
-                                </template>
-                                View
-                            </n-tooltip>
-                            <n-tooltip>
-                                <template #trigger>
-                                    <n-button strong secondary circle type="warning">
-                                        <template #icon>
-                                            <n-icon>
-                                                <Edit16Filled />
-                                            </n-icon>
-                                        </template>
-                                    </n-button>
-                                </template>
-                                Edit
-                            </n-tooltip>
-                            <n-tooltip>
-                                <template #trigger>
-                                    <n-button strong secondary circle type="error">
+                                    <n-button :loading="docDeletePending" circle secondary strong type="error"
+                                        :disabled="currentUser?.role !== 'ADMIN'" @click="() => deleteHandler(item.id)">
                                         <template #icon>
                                             <n-icon>
                                                 <Delete20Regular />
@@ -75,7 +49,8 @@
                 </tr>
             </template>
             <template #paginate>
-                <Paginate :page="params.page" :offset="params.offset" :total="2" :changeHandler="paramsChangeHandler" />
+                <Paginate :changeHandler="paramsChangeHandler" :offset="params.offset" :page="params.page"
+                    :total="data?.data?.last_page" />
             </template>
         </Table>
     </n-card>
@@ -84,17 +59,21 @@
 <script setup lang="ts">
 import Paginate from '@/Components/UI/Paginate.vue';
 import Table from '@/Components/UI/Table.vue';
-import { Images } from '@/Constants/theme';
 import Panel from '@/Layouts/Panel.vue';
 import { Head } from '@inertiajs/vue3';
-import { View } from '@vicons/carbon';
-import { Delete20Regular, Edit16Filled } from '@vicons/fluent';
-import { ref } from 'vue';
+import { Delete20Regular } from '@vicons/fluent';
+import { ref, inject } from 'vue';
+import { fetchApplications, deleteApplication } from '@/States/Actions/Applications';
+import { useQuery, useMutation } from '@tanstack/vue-query';
+import { useMessage } from 'naive-ui';
 
 defineOptions({ layout: Panel })
 
+const currentUser = inject('currentUser')
+const message = useMessage()
+
 const headers: { label: string, align: 'left' | 'right' | 'justify' }[] = [
-    { label: 'Date', align: 'left' },
+    { label: 'Name', align: 'left' },
     { label: 'Lead', align: 'left' },
     { label: 'Counselor', align: 'left' },
     { label: 'Status', align: 'left' },
@@ -107,5 +86,24 @@ const params = ref<{ [key: string]: number | null }>({
 
 const paramsChangeHandler = (field: string, value: number | null) => {
     params.value[field] = value;
+}
+
+const { isSuccess, isFetching, isError, data, error, refetch } = useQuery({
+    queryKey: ['applications', params.value],
+    queryFn: () => fetchApplications(`page=${params.value.page}&offset=${params.value.offset}&relations[]=lead:id,name,email&relations[]=counselor:id,name,email`),
+})
+
+const { isPending: docDeletePending, mutate: docDeleteMutate } = useMutation({
+    mutationFn: (id: string) => deleteApplication(id), onSuccess: (data) => {
+        message.success(data.message)
+        refetch()
+    },
+    onError: (error) => {
+        message.error(error.message)
+    }
+})
+
+const deleteHandler = (id: string) => {
+    docDeleteMutate(id)
 }
 </script>

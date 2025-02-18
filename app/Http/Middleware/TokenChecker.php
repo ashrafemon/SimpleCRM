@@ -17,7 +17,10 @@ class TokenChecker
     {
         $token = explode(' ', $request->header('authorization'))[1];
 
-        if (! Token::query()->where(['token' => $token, 'is_blacklist' => 0])->isNotExpire()->exists()) {
+        if (! Token::query()
+            ->where(['token' => $token])
+            ->where(fn($q) => $q->where(['is_blacklist' => 1])->orWhereDate('expire_at', '<=', now()))
+            ->exists()) {
             return messageResponse('Sorry, the token is invalid, blacklisted, or expires.', 401);
         }
 

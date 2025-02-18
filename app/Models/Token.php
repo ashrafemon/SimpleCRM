@@ -14,8 +14,8 @@ class Token extends Model
         ];
     }
 
-    public function scopeIsNotExpire($query)
+    public function scopeIsExpire($query)
     {
-        return $query->whereDate('expire_at', '>', now());
+        return $query->whereDate('expire_at', '<=', now());
     }
 }

@@ -23,9 +23,10 @@ class LeadMaintainerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'lead_id' => 'sometimes|required',
-            'user_id' => 'sometimes|required',
-            'status'  => 'sometimes|required|in:ASSIGNED,IN_PROGRESS,BAD_TIMING,NOT_INTERESTED,NOT_QUALIFIED,CONVERTED',
+            'lead_id'  => 'sometimes|required',
+            'user_id'  => 'sometimes|required',
+            'status'   => 'sometimes|required|in:ASSIGNED,IN_PROGRESS,BAD_TIMING,NOT_INTERESTED,NOT_QUALIFIED,CONVERTED',
+            'app_name' => 'required_if:status,CONVERTED',
         ];
     }
 

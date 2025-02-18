@@ -44,6 +44,7 @@ class UserRepository implements RepositoryContract
     public function get($id)
     {
         try {
+            $condition = ['id' => $id];
             $relations = [];
             $fields    = ['id', 'name', 'email', 'phone', 'role', 'status'];
 
@@ -55,7 +56,7 @@ class UserRepository implements RepositoryContract
                 $relations = gettype(request()->input('relations')) === 'array' ? request()->input('relations') : explode(',', request()->input('relations'));
             }
 
-            if (! $doc = User::query()->with($relations)->select($fields)->first()) {
+            if (! $doc = User::query()->with($relations)->select($fields)->where($condition)->first()) {
                 return messageResponse();
             }
 
