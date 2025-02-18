@@ -1,25 +1,28 @@
 <?php
 namespace App\Policies;
 
-use App\Models\Application;
 use App\Models\User;
 
-class ApplicationPolicy
+class UserPolicy
 {
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['ADMIN', 'COUNSELOR']);
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Application $application): bool
+    public function view(User $user, User $model): bool
     {
-        return $application->user_id === $user->id;
+        if ($user->role === 'ADMIN') {
+            return true;
+        }
+
+        return $user->id === $model->id;
     }
 
     /**
@@ -33,18 +36,15 @@ class ApplicationPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Application $application): bool
+    public function update(User $user, User $model): bool
     {
-        if ($user->role === 'ADMIN') {
-            return true;
-        }
-        return $application->user_id === $user->id;
+        return $user->role === 'ADMIN';
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Application $application): bool
+    public function delete(User $user, User $model): bool
     {
         return $user->role === 'ADMIN';
     }

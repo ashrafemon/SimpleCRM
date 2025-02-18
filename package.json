@@ -7,6 +7,7 @@
         "ts-check": "vue-tsc --noEmit"
     },
     "devDependencies": {
+        "@tanstack/vue-query-devtools": "^5.66.0",
         "@types/js-cookie": "^3.0.6",
         "@vicons/antd": "^0.13.0",
         "@vicons/carbon": "^0.13.0",
@@ -17,7 +18,6 @@
         "@vicons/material": "^0.13.0",
         "@vicons/tabler": "^0.13.0",
         "@vitejs/plugin-vue": "^5.2.1",
-        "@tanstack/vue-query-devtools": "^5.66.0",
         "autoprefixer": "^10.4.20",
         "axios": "^1.7.9",
         "concurrently": "^9.0.1",
@@ -32,6 +32,7 @@
     },
     "dependencies": {
         "@inertiajs/vue3": "^2.0.3",
+        "@syncfusion/ej2-vue-kanban": "^28.2.3",
         "@tanstack/vue-query": "^5.66.0",
         "js-cookie": "^3.0.5",
         "jwt-decode": "^4.0.0",

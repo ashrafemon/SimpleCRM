@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\LeadMaintainerController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
@@ -17,4 +18,6 @@ Route::middleware(['auth:api', 'tokenChecker'])->group(function () {
     Route::apiResource('leads', LeadController::class)->except(['create', 'edit']);
     Route::apiResource('lead-maintainers', LeadMaintainerController::class)->except(['create', 'edit']);
     Route::apiResource('applications', ApplicationController::class)->except(['create', 'edit']);
+
+    Route::get('reports/summary', [ReportController::class, 'summary']);
 });

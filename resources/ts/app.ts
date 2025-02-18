@@ -4,6 +4,7 @@ import naive from "naive-ui";
 import { createApp, h } from "vue";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import AuthProvider from "@/Providers/AuthProvider.vue";
+import { KanbanPlugin } from "@syncfusion/ej2-vue-kanban";
 
 createInertiaApp({
     resolve: (name) => {
@@ -19,12 +20,13 @@ createInertiaApp({
                         h(AuthProvider, null, {
                             default: () => h(App, props),
                         }),
-                        // h(App, props)
+                    // h(App, props)
                 }),
         })
             .use(plugin)
             .use(naive)
             .use(VueQueryPlugin)
+            .use(KanbanPlugin)
             .mount(el);
     },
     progress: {
