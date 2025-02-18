@@ -35,7 +35,7 @@ class LeadRepository implements RepositoryContract
                 ->when(request()->input('type'), fn($q) => $q->where('type', request()->input('type')))
                 ->when(request()->input('status'), fn($q) => $q->where('status', request()->input('status')))
                 ->when(request()->input('search'), function ($q) {
-                    return $q->where(fn() => $q->where('name', 'like', '%' . request()->input('search') . '%')->orWhere('email', 'like', '%' . request()->input('search') . '%'));
+                    return $q->where(fn($query) => $query->where('name', 'like', '%' . request()->input('search') . '%')->orWhere('email', 'like', '%' . request()->input('search') . '%'));
                 })
                 ->when($userRole === 'COUNSELOR', fn($q) => $q->whereHas('maintainers', fn($query) => $query->where('user_id', auth()->guard('api')->id())));
 

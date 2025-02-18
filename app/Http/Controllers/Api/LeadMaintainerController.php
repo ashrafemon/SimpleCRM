@@ -10,11 +10,23 @@ class LeadMaintainerController extends Controller
     public function __construct(private LeadMaintainerRepository $repository)
     {}
 
+    /**
+     * @LRDparam lead_id    string
+     * @LRDparam user_id    string
+     * @LRDparam status     string|in:ASSIGNED,IN_PROGRESS,BAD_TIMING,NOT_INTERESTED,NOT_QUALIFIED,CONVERTED
+     * @LRDparam fields     string
+     * @LRDparam relations  string
+     * @LRDparam get_all    int|in:0,1
+     */
     public function index()
     {
         return $this->repository->gets();
     }
 
+    /**
+     * @LRDparam fields string
+     * @LRDparam relations string
+     */
     public function show(string $id)
     {
         return $this->repository->get($id);

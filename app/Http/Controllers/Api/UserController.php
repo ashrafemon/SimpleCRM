@@ -10,11 +10,23 @@ class UserController extends Controller
     public function __construct(private UserRepository $repository)
     {}
 
+    /**
+     * @LRDparam role   string|in:ADMIN,COUNSELOR
+     * @LRDparam status string|in:active,inactive
+     * @LRDparam search string
+     * @LRDparam fields string
+     * @LRDparam relations string
+     * @LRDparam get_all int|in:0,1
+     */
     public function index()
     {
         return $this->repository->gets();
     }
 
+    /**
+     * @LRDparam fields string
+     * @LRDparam relations string
+     */
     public function show(string $id)
     {
         return $this->repository->get($id);

@@ -19,10 +19,7 @@ class ApplicationRepository implements RepositoryContract
                 return messageResponse("Sorry, You can't access this resource", 403);
             }
 
-            $userId = auth()->guard('api')->check() ?
-            auth()->guard('api')->user()->role === 'COUNSELOR'
-            ? auth()->guard('api')->user()->id : null
-            : null;
+            $userRole = auth()->guard('api')->check() ? auth()->guard('api')->user()->role : null;
 
             if (request()->has('fields') && request()->input('fields')) {
                 $fields = gettype(request()->input('fields')) === 'array' ? request()->input('fields') : explode(',', request()->input('fields'));
@@ -36,7 +33,7 @@ class ApplicationRepository implements RepositoryContract
                 ->with($relations)
                 ->select($fields)
                 ->when(request()->input('lead_id'), fn($q) => $q->where('lead_id', request()->input('lead_id')))
-                ->when($userId, fn($q) => $q->where('user_id', $userId))
+                ->when($userRole === 'COUNSELOR', fn($q) => $q->where('user_id', auth()->guard('api')->id()))
                 ->when(request()->input('status'), fn($q) => $q->where('status', request()->input('status')))
                 ->when(request()->input('search'), fn($q) => $q->where('name', 'like', '%' . request()->input('search') . '%'));
 

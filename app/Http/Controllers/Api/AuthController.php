@@ -40,7 +40,6 @@ class AuthController extends Controller
         } catch (Exception $e) {
             return serverError($e);
         }
-
     }
 
     public function guard()

@@ -4,8 +4,8 @@ use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\LeadController;
 use App\Http\Controllers\Api\LeadMaintainerController;
+use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\UserController;
-use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
