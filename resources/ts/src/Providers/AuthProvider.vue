@@ -5,52 +5,38 @@
 <script lang="ts" setup>
 import { getQueryString } from '@/Utils/helper';
 import { router, usePage } from '@inertiajs/vue3';
+import useAuthStore from '../States/Stores/authStore';
 import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import moment from 'moment';
-import { onMounted, onUnmounted, provide, ref, watch } from 'vue';
+import { onMounted } from 'vue';
 
+const authStore = useAuthStore();
 const page = usePage();
-const isAuthenticate = ref(false);
-const currentUser = ref({});
-const isLoading = ref(true);
-const token = ref<string | null>(null);
 
-provide('isAuthenticate', isAuthenticate)
-provide('currentUser', currentUser)
-
-let cookieWatcher: number | undefined = undefined;
-
-const decoder = () => {
-    token.value = Cookies.get("token") ?? null;
-    if (!token.value) {
-        if (!page.url.includes("/login")) {
-            router.visit(`/login?redirect=${page.url}`, {
-                replace: true,
-            });
-        }
-        isLoading.value = false;
+const checkAuth = () => {
+    const cookieToken = Cookies.get('token');
+    if (!cookieToken) {
+        handleUnauthenticated();
         return;
     }
 
-    const decode = jwtDecode(token.value);
+    if (!cookieToken) {
+        handleUnauthenticated();
+        return;
+    }
+
+    const decode = jwtDecode(cookieToken);
     const exp = decode?.exp
         ? moment.unix(decode.exp).diff(moment(), "minutes")
         : -1;
+
     if (exp <= 0) {
-        Cookies.remove("token");
-        if (!page.url.includes("/login")) {
-            router.visit(`/login?redirect=${page.url}`, {
-                replace: true,
-            });
-        }
-        isLoading.value = false;
+        handleUnauthenticated();
         return;
     }
 
-    isAuthenticate.value = true;
-    currentUser.value = decode;
-    isLoading.value = false;
+    authStore.setAuth({ isAuthenticated: true, currentUser: decode, token: cookieToken });
 
     if (page.url.includes("/login")) {
         const queryString = getQueryString();
@@ -58,30 +44,19 @@ const decoder = () => {
             replace: true,
         });
     }
+}
 
-    cookieWatcher = setInterval(() => {
-        const currentToken = Cookies.get("token") ?? null;
-        if (currentToken !== token.value) {
-            token.value = currentToken;
-        }
-    }, 1000);
+const handleUnauthenticated = () => {
+    Cookies.remove("token");
+    authStore.resetAuth();
+    if (!page.url.includes("/login")) {
+        router.visit(`/login?redirect=${page.url}`, {
+            replace: true,
+        });
+    }
 }
 
 onMounted(() => {
-    decoder()
+    checkAuth();
 });
-
-onUnmounted(() => {
-    isAuthenticate.value = false;
-    currentUser.value = {};
-    isLoading.value = true;
-
-    if (cookieWatcher) {
-        clearInterval(cookieWatcher);
-    }
-})
-
-watch(token, () => {
-    decoder()
-})
 </script>

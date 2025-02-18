@@ -1,30 +1,32 @@
 <template>
+    <Panel>
 
-    <Head title="Dashboard" />
+        <Head title="Dashboard" />
 
-    <template v-if="isFetching">
-        <n-skeleton text :repeat="12" class="w-full" />
-    </template>
+        <template v-if="isFetching">
+            <n-skeleton text :repeat="12" class="w-full" />
+        </template>
 
-    <template v-else-if="isError">
-        <n-empty description="Failed to fetch data" />
-    </template>
+        <template v-else-if="isError">
+            <n-empty description="Failed to fetch data" />
+        </template>
 
-    <template v-else>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <n-card class="rounded-xl" v-for="(summary, i) in summaries" :key="i">
-                <n-space align="center">
-                    <n-icon size="50">
-                        <component :is="summary.icon" />
-                    </n-icon>
-                    <n-flex vertical size="small">
-                        <p class="text-sm font-medium">{{ summary.label }}</p>
-                        <p class="text-2xl font-semibold">{{ summary.value }}</p>
-                    </n-flex>
-                </n-space>
-            </n-card>
-        </div>
-    </template>
+        <template v-else>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+                <n-card class="rounded-xl" v-for="(summary, i) in summaries" :key="i">
+                    <n-space align="center">
+                        <n-icon size="50">
+                            <component :is="summary.icon" />
+                        </n-icon>
+                        <n-flex vertical size="small">
+                            <p class="text-sm font-medium">{{ summary.label }}</p>
+                            <p class="text-2xl font-semibold">{{ summary.value }}</p>
+                        </n-flex>
+                    </n-space>
+                </n-card>
+            </div>
+        </template>
+    </Panel>
 </template>
 
 <script setup lang="ts">
@@ -38,7 +40,6 @@ import { NIcon } from 'naive-ui';
 import { fetchSummaryReports } from '@/States/Actions/Reports';
 import { useQuery } from '@tanstack/vue-query';
 import { watch, computed } from 'vue';
-defineOptions({ layout: Panel })
 
 const { data, isFetching, isError, error } = useQuery({
     queryKey: ['summary-reports'],

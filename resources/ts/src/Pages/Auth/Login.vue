@@ -1,26 +1,28 @@
 <template>
+    <Authenticate>
 
-    <Head title="Login" />
+        <Head title="Login" />
 
-    <form @submit.prevent="submitHandler">
-        <n-form-item label="Email">
-            <n-flex vertical class="w-full">
-                <n-input v-model:value="form.email" @blur="() => errorFieldReset('email')" size="large"
-                    placeholder="Ex. test@test.com" />
-                <p v-if="errors.email.show" class="text-xs font-medium text-red-500">{{ errors.email.text }}</p>
-            </n-flex>
-        </n-form-item>
-        <n-form-item label="Password">
-            <n-flex vertical class="w-full">
-                <n-input v-model:value="form.password" @blur="() => errorFieldReset('password')" size="large"
-                    show-password-on="mousedown" type="password" placeholder="Ex. 123456" />
-                <p v-if="errors.password.show" class="text-xs font-medium text-red-500">{{ errors.password.text }}
-                </p>
-            </n-flex>
-        </n-form-item>
-        <n-button :loading="loginPending" type="info" size="large" class="text-xl font-semibold" block
-            attrType="submit">Sign In</n-button>
-    </form>
+        <form @submit.prevent="submitHandler">
+            <n-form-item label="Email">
+                <n-flex vertical class="w-full">
+                    <n-input v-model:value="form.email" @blur="() => errorFieldReset('email')" size="large"
+                        placeholder="Ex. test@test.com" />
+                    <p v-if="errors.email.show" class="text-xs font-medium text-red-500">{{ errors.email.text }}</p>
+                </n-flex>
+            </n-form-item>
+            <n-form-item label="Password">
+                <n-flex vertical class="w-full">
+                    <n-input v-model:value="form.password" @blur="() => errorFieldReset('password')" size="large"
+                        show-password-on="mousedown" type="password" placeholder="Ex. 123456" />
+                    <p v-if="errors.password.show" class="text-xs font-medium text-red-500">{{ errors.password.text }}
+                    </p>
+                </n-flex>
+            </n-form-item>
+            <n-button :loading="loginPending" type="info" size="large" class="text-xl font-semibold" block
+                attrType="submit">Sign In</n-button>
+        </form>
+    </Authenticate>
 </template>
 
 <script setup lang="ts">
@@ -35,8 +37,10 @@ import { useMessage } from 'naive-ui';
 import Validator from 'Validator';
 import { ref } from 'vue';
 import { getQueryString } from '../../Utils/helper';
+import useAuthStore from '@/States/Stores/authStore';
+import { jwtDecode } from 'jwt-decode';
 
-defineOptions({ layout: Authenticate })
+const { setAuth } = useAuthStore();
 
 const message = useMessage()
 const form = ref({
@@ -57,6 +61,12 @@ const { isPending: loginPending, mutate: loginMutate } = useMutation({
     onSuccess: (data) => {
         message.success(data.message);
         Cookies.set('token', data.data)
+        const decode = jwtDecode(data.data);
+        setAuth({
+            isAuthenticated: true,
+            currentUser: decode,
+            token: data.data
+        })
         const queryString = getQueryString();
         router.visit(queryString.redirect ?? "/dashboard", {
             replace: true,

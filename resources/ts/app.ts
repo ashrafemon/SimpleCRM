@@ -5,6 +5,11 @@ import { createApp, h } from "vue";
 import { VueQueryPlugin } from "@tanstack/vue-query";
 import AuthProvider from "@/Providers/AuthProvider.vue";
 import { KanbanPlugin } from "@syncfusion/ej2-vue-kanban";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
+
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
 
 createInertiaApp({
     resolve: (name) => {
@@ -27,6 +32,7 @@ createInertiaApp({
             .use(naive)
             .use(VueQueryPlugin)
             .use(KanbanPlugin)
+            .use(pinia)
             .mount(el);
     },
     progress: {

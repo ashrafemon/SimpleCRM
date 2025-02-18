@@ -2,7 +2,7 @@
     <div class="w-full h-screen bg-gray-300 flex justify-center items-center">
         <n-space align="center" vertical>
             <n-image :src="Images.logo" fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                     width="100"/>
+                width="100" />
 
             <n-card class="rounded-xl" size="huge">
                 <n-space vertical>
@@ -12,7 +12,7 @@
                             You must become a member to login and access the entire site
                         </p>
                     </n-flex>
-                    <slot/>
+                    <slot />
                 </n-space>
             </n-card>
         </n-space>
@@ -20,5 +20,5 @@
 </template>
 
 <script lang="ts" setup>
-import {Images} from '@/Constants/theme'
+import { Images } from '@/Constants/theme';
 </script>

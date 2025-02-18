@@ -3,57 +3,64 @@
         <n-layout-header bordered class="p-1 h-[60px]">
             <n-space align="center" justify="space-between">
                 <Link href="/dashboard">
-                    <n-space align="center">
-                        <n-image :src="Images.logo" preview-disabled width="50"/>
-                        <p class="text-xl font-semibold">SimpleCRM</p>
-                    </n-space>
+                <n-space align="center">
+                    <n-image :src="Images.logo" preview-disabled width="50" />
+                    <p class="text-xl font-semibold">SimpleCRM</p>
+                </n-space>
                 </Link>
 
-                <n-dropdown :on-select="userOptionHandler" :options="userOptions">
-                    <n-button quaternary size="large">
-                        <template #icon>
-                            <n-image :src="Images.logo"/>
-                        </template>
-                        {{ currentUser?.name ?? 'Anonymous' }}
-                    </n-button>
-                </n-dropdown>
+                <template v-if="isAuthenticated">
+                    <n-dropdown :on-select="userOptionHandler" :options="userOptions">
+                        <n-button quaternary size="large">
+                            <template #icon>
+                                <n-image :src="Images.logo" />
+                            </template>
+                            {{ currentUser?.name ?? 'Anonymous' }}
+                        </n-button>
+                    </n-dropdown>
+                </template>
             </n-space>
         </n-layout-header>
         <n-layout class="!top-[60px]" has-sider position="absolute">
             <n-layout-sider :collapsed-width="64" :native-scrollbar="false" :width="200" bordered collapse-mode="width"
-                            show-trigger>
+                show-trigger>
                 <n-menu :collapsed-icon-size="22" :collapsed-width="64" :on-update:value="pageRouter"
-                        :options="navOptions"/>
+                    :options="navOptions" />
             </n-layout-sider>
             <n-layout-content class="p-2">
-                <slot/>
+                <slot />
             </n-layout-content>
         </n-layout>
     </n-layout>
-    <VueQueryDevtools/>
+    <VueQueryDevtools />
 </template>
 
 <script lang="ts" setup>
-import {Images} from '@/Constants/theme';
-import {Link, router, usePage} from '@inertiajs/vue3';
-import {Dashboard, TaskApproved, UserAvatar} from '@vicons/carbon';
-import {IosLogOut} from '@vicons/ionicons4';
-import {Stack2} from '@vicons/tabler';
-import {NIcon, useMessage} from 'naive-ui';
-import {Component, h, inject} from 'vue';
-import {VueQueryDevtools} from '@tanstack/vue-query-devtools'
-import {useMutation} from '@tanstack/vue-query';
-import {logout} from '@/States/Actions/Auth';
+import { Images } from '@/Constants/theme';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { Dashboard, TaskApproved, UserAvatar } from '@vicons/carbon';
+import { IosLogOut } from '@vicons/ionicons4';
+import { Stack2 } from '@vicons/tabler';
+import { NIcon, useMessage } from 'naive-ui';
+import { Component, h, inject, watch, computed } from 'vue';
+import { VueQueryDevtools } from '@tanstack/vue-query-devtools'
+import { useMutation } from '@tanstack/vue-query';
+import { logout } from '@/States/Actions/Auth';
 import Cookies from 'js-cookie';
+import useAuthStore from '@/States/Stores/authStore';
 
-const currentUser = inject('currentUser');
 const message = useMessage()
+const authStore = useAuthStore();
+
+const isAuthenticated = computed(() => authStore.isAuthenticated);
+const currentUser = computed(() => authStore.currentUser);
 
 const logoutMutation = useMutation({
     mutationFn: () => logout(),
     onSuccess: (data) => {
         Cookies.remove('token')
         router.visit('/login')
+        authStore.resetAuth()
     },
     onError: (error) => {
         message.error(error.message)
@@ -61,7 +68,7 @@ const logoutMutation = useMutation({
 })
 
 const renderIcon = (icon: Component) => {
-    return () => h(NIcon, null, {default: () => h(icon)})
+    return () => h(NIcon, null, { default: () => h(icon) })
 }
 
 const pageRouter = (key: string) => {
@@ -93,14 +100,6 @@ const navOptions = [
 ]
 
 const userOptions = [
-    {
-        label: 'Profile',
-        key: 'profile',
-        icon: renderIcon(UserAvatar)
-    },
-    {
-        type: 'divider'
-    },
     {
         label: 'Logout',
         key: 'logout',
