@@ -71,4 +71,9 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(LeadMaintainer::class, 'user_id');
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'user_id');
+    }
 }

@@ -20,4 +20,5 @@ Route::middleware(['auth:api', 'tokenChecker'])->group(function () {
     Route::apiResource('applications', ApplicationController::class)->except(['create', 'edit']);
 
     Route::get('reports/summary', [ReportController::class, 'summary']);
+    Route::get('reports/stats', [ReportController::class, 'counselorStats']);
 });

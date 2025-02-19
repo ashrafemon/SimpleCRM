@@ -1,90 +1,87 @@
 <template>
-    <Panel>
 
-        <Head title="Leads" />
+    <Head title="Leads" />
 
-        <n-modal v-model:show="dialog" :title="!selectedId ? 'Add Lead' : 'Edit Lead'" class="w-4/5 lg:w-1/3"
-            preset="card">
-            <LeadForm :closer="closeHandler" :payload="selectedId" :refetch="refetch" />
-        </n-modal>
+    <n-modal v-model:show="dialog" :title="!selectedId ? 'Add Lead' : 'Edit Lead'" class="w-4/5 lg:w-1/3" preset="card">
+        <LeadForm :closer="closeHandler" :payload="selectedId" :refetch="refetch" />
+    </n-modal>
 
-        <n-modal v-model:show="assignmentDialog" class="w-4/5 lg:w-1/3" preset="card" title="Add Assignment">
-            <LeadAssignmentForm :closer="assignCloseHandler" :leadId="selectedLeadId" :payload="selectedId"
-                :refetch="refetch" :userId="currentUser?.role === 'COUNSELOR' ? currentUser?.id : null" />
-        </n-modal>
+    <n-modal v-model:show="assignmentDialog" class="w-4/5 lg:w-1/3" preset="card" title="Add Assignment">
+        <LeadAssignmentForm :closer="assignCloseHandler" :leadId="selectedLeadId" :payload="selectedId"
+            :refetch="refetch" :userId="currentUser?.role === 'COUNSELOR' ? currentUser?.id : null" />
+    </n-modal>
 
-        <n-card>
-            <n-flex align="center" class="mb-5" justify="space-between">
-                <p class="text-xl font-semibold">Leads</p>
-                <template v-if="currentUser?.role === 'ADMIN'">
-                    <n-button type="info" @click="dialog = !dialog">Add Lead</n-button>
-                </template>
-            </n-flex>
+    <n-card>
+        <n-flex align="center" class="mb-5" justify="space-between">
+            <p class="text-xl font-semibold">Leads</p>
+            <template v-if="currentUser?.role === 'ADMIN'">
+                <n-button type="info" @click="dialog = !dialog">Add Lead</n-button>
+            </template>
+        </n-flex>
 
-            <Table :error="error?.message" :found="isSuccess && data?.data?.data.length > 0" :headers="headers"
-                :isError="isError" :isLoading="isFetching">
-                <template #rows>
-                    <tr v-for="(item, i) in data?.data?.data" :key="i">
-                        <td>{{ item?.name ?? 'N/A' }}</td>
-                        <td>{{ item?.email ?? 'N/A' }}</td>
-                        <td>{{ item?.phone ?? 'N/A' }}</td>
-                        <td>{{ item?.maintainer?.counselor?.name ?? 'N/A' }}</td>
-                        <td class="capitalize">{{ item?.maintainer?.status ?? 'N/A' }}</td>
-                        <td>
-                            <n-space align="center">
+        <Table :error="error?.message" :found="isSuccess && data?.data?.data.length > 0" :headers="headers"
+            :isError="isError" :isLoading="isFetching">
+            <template #rows>
+                <tr v-for="(item, i) in data?.data?.data" :key="i">
+                    <td>{{ item?.name ?? 'N/A' }}</td>
+                    <td>{{ item?.email ?? 'N/A' }}</td>
+                    <td>{{ item?.phone ?? 'N/A' }}</td>
+                    <td>{{ item?.maintainer?.counselor?.name ?? 'Not Assigned' }}</td>
+                    <td class="capitalize">{{ item?.maintainer?.status ?? 'Not Assigned' }}</td>
+                    <td>
+                        <n-space align="center">
+                            <n-tooltip>
+                                <template #trigger>
+                                    <n-button :loading="docDeletePending" circle secondary strong type="info"
+                                        :disabled="item?.maintainer?.status === 'CONVERTED'"
+                                        @click="() => currentUser?.role === 'COUNSELOR' ? updateAssignmentHandler(item.maintainer) : assignHandler(item.id)">
+                                        <template #icon>
+                                            <n-icon>
+                                                <ConvertRange20Regular />
+                                            </n-icon>
+                                        </template>
+                                    </n-button>
+                                </template>
+                                Assignment
+                            </n-tooltip>
+                            <template v-if="currentUser?.role === 'ADMIN'">
                                 <n-tooltip>
                                     <template #trigger>
-                                        <n-button :loading="docDeletePending" circle secondary strong type="info"
-                                            :disabled="item?.maintainer?.status === 'CONVERTED'"
-                                            @click="() => currentUser?.role === 'COUNSELOR' ? updateAssignmentHandler(item.maintainer) : assignHandler(item.id)">
+                                        <n-button :loading="docDeletePending" circle secondary strong type="warning"
+                                            @click="() => editHandler(item.id)">
                                             <template #icon>
                                                 <n-icon>
-                                                    <ConvertRange20Regular />
+                                                    <Edit16Filled />
                                                 </n-icon>
                                             </template>
                                         </n-button>
                                     </template>
-                                    Assignment
+                                    Edit
                                 </n-tooltip>
-                                <template v-if="currentUser?.role === 'ADMIN'">
-                                    <n-tooltip>
-                                        <template #trigger>
-                                            <n-button :loading="docDeletePending" circle secondary strong type="warning"
-                                                @click="() => editHandler(item.id)">
-                                                <template #icon>
-                                                    <n-icon>
-                                                        <Edit16Filled />
-                                                    </n-icon>
-                                                </template>
-                                            </n-button>
-                                        </template>
-                                        Edit
-                                    </n-tooltip>
-                                    <n-tooltip>
-                                        <template #trigger>
-                                            <n-button :loading="docDeletePending" circle secondary strong type="error"
-                                                @click="() => deleteHandler(item.id)">
-                                                <template #icon>
-                                                    <n-icon>
-                                                        <Delete20Regular />
-                                                    </n-icon>
-                                                </template>
-                                            </n-button>
-                                        </template>
-                                        Delete
-                                    </n-tooltip>
-                                </template>
-                            </n-space>
-                        </td>
-                    </tr>
-                </template>
-                <template #paginate>
-                    <Paginate :changeHandler="paramsChangeHandler" :offset="params.offset" :page="params.page"
-                        :total="data?.data?.last_page" />
-                </template>
-            </Table>
-        </n-card>
-    </Panel>
+                                <n-tooltip>
+                                    <template #trigger>
+                                        <n-button :loading="docDeletePending" circle secondary strong type="error"
+                                            @click="() => deleteHandler(item.id)">
+                                            <template #icon>
+                                                <n-icon>
+                                                    <Delete20Regular />
+                                                </n-icon>
+                                            </template>
+                                        </n-button>
+                                    </template>
+                                    Delete
+                                </n-tooltip>
+                            </template>
+                        </n-space>
+                    </td>
+                </tr>
+            </template>
+            <template #paginate>
+                <Paginate :changeHandler="paramsChangeHandler" :offset="params.offset" :page="params.page"
+                    :total="data?.data?.last_page" />
+            </template>
+        </Table>
+    </n-card>
 </template>
 
 <script lang="ts" setup>
@@ -94,12 +91,14 @@ import Paginate from '@/Components/UI/Paginate.vue';
 import Table from '@/Components/UI/Table.vue';
 import Panel from '@/Layouts/Panel.vue';
 import { deleteLead, fetchLeads } from '@/States/Actions/Leads';
+import useAuthStore from '@/States/Stores/authStore';
 import { Head } from '@inertiajs/vue3';
 import { useMutation, useQuery } from '@tanstack/vue-query';
 import { ConvertRange20Regular, Delete20Regular, Edit16Filled } from '@vicons/fluent';
 import { useMessage } from 'naive-ui';
-import { ref, computed } from 'vue';
-import useAuthStore from '@/States/Stores/authStore';
+import { computed, ref } from 'vue';
+
+defineOptions({ layout: Panel })
 
 const message = useMessage()
 const authStore = useAuthStore();

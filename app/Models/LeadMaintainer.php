@@ -21,4 +21,9 @@ class LeadMaintainer extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function applications()
+    {
+        return $this->hasMany(Application::class, 'lead_id', 'lead_id');
+    }
 }
